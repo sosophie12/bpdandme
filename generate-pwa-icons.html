@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<body style="background:#222;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:white;gap:2rem;">
+<h2>Icônes PWA Sophie</h2>
+<div style="display:flex;gap:2rem;flex-wrap:wrap;justify-content:center;">
+<div>
+<h3>192x192</h3>
+<canvas id="c192" width="192" height="192" style="border:1px solid #555;border-radius:16px;"></canvas>
+<br><a id="dl192" download="icon-192.png" style="color:#9b72cf;cursor:pointer;">📥 Télécharger</a>
+</div>
+<div>
+<h3>512x512</h3>
+<canvas id="c512" width="512" height="512" style="border:1px solid #555;border-radius:16px;max-width:256px;"></canvas>
+<br><a id="dl512" download="icon-512.png" style="color:#9b72cf;cursor:pointer;">📥 Télécharger</a>
+</div>
+</div>
+<script>
+function drawIcon(canvas) {
+    const s = canvas.width / 256;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(s, s);
+
+    const bg = ctx.createLinearGradient(0,0,256,256);
+    bg.addColorStop(0, '#9b72cf');
+    bg.addColorStop(1, '#f2a7c3');
+    
+    // Rounded square background
+    const r = 40;
+    ctx.beginPath();
+    ctx.moveTo(r, 0); ctx.lineTo(256-r, 0); ctx.quadraticCurveTo(256,0,256,r);
+    ctx.lineTo(256,256-r); ctx.quadraticCurveTo(256,256,256-r,256);
+    ctx.lineTo(r,256); ctx.quadraticCurveTo(0,256,0,256-r);
+    ctx.lineTo(0,r); ctx.quadraticCurveTo(0,0,r,0);
+    ctx.closePath();
+    ctx.fillStyle = bg;
+    ctx.fill();
+
+    // Fox ears
+    ctx.fillStyle = '#FF8C42';
+    ctx.beginPath(); ctx.moveTo(65,50); ctx.lineTo(95,100); ctx.lineTo(35,100); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(191,50); ctx.lineTo(221,100); ctx.lineTo(161,100); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#FFD4A8';
+    ctx.beginPath(); ctx.moveTo(72,60); ctx.lineTo(90,92); ctx.lineTo(54,92); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(184,60); ctx.lineTo(206,92); ctx.lineTo(168,92); ctx.closePath(); ctx.fill();
+
+    // Head
+    ctx.fillStyle = '#FF8C42';
+    ctx.beginPath(); ctx.ellipse(128,135,75,65,0,0,Math.PI*2); ctx.fill();
+
+    // White face
+    ctx.fillStyle = '#FFF5E6';
+    ctx.beginPath(); ctx.ellipse(128,150,50,45,0,0,Math.PI*2); ctx.fill();
+
+    // Eyes
+    ctx.fillStyle = '#2D1B00';
+    ctx.beginPath(); ctx.ellipse(105,125,10,12,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(151,125,10,12,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'white';
+    ctx.beginPath(); ctx.arc(108,121,4,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(154,121,4,0,Math.PI*2); ctx.fill();
+
+    // Nose
+    ctx.fillStyle = '#2D1B00';
+    ctx.beginPath(); ctx.ellipse(128,145,7,5,0,0,Math.PI*2); ctx.fill();
+
+    // Mouth
+    ctx.strokeStyle = '#2D1B00'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(120,152); ctx.quadraticCurveTo(128,162,136,152); ctx.stroke();
+
+    // Cheeks
+    ctx.fillStyle = 'rgba(255,182,193,0.5)';
+    ctx.beginPath(); ctx.arc(90,142,10,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(166,142,10,0,Math.PI*2); ctx.fill();
+
+    // Heart
+    ctx.save(); ctx.translate(128,195); ctx.scale(0.55,0.55);
+    ctx.fillStyle = '#FF6B9D';
+    ctx.beginPath(); ctx.moveTo(0,-15);
+    ctx.bezierCurveTo(-10,-30,-35,-20,-35,-5);
+    ctx.bezierCurveTo(-35,10,-15,20,0,32);
+    ctx.bezierCurveTo(15,20,35,10,35,-5);
+    ctx.bezierCurveTo(35,-20,10,-30,0,-15);
+    ctx.fill(); ctx.restore();
+}
+
+drawIcon(document.getElementById('c192'));
+drawIcon(document.getElementById('c512'));
+document.getElementById('dl192').href = document.getElementById('c192').toDataURL('image/png');
+document.getElementById('dl512').href = document.getElementById('c512').toDataURL('image/png');
+
+// Auto-download both
+setTimeout(() => {
+    document.getElementById('dl192').click();
+    setTimeout(() => document.getElementById('dl512').click(), 500);
+}, 1000);
+</script>
+</body>
+</html>
