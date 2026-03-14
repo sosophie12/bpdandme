@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9b72cf"/>
+      <stop offset="100%" style="stop-color:#f2a7c3"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="128" cy="128" r="120" fill="url(#bg)"/>
+  <!-- Fox face -->
+  <!-- Left ear -->
+  <polygon points="65,45 95,95 35,95" fill="#FF8C42" stroke="#E07030" stroke-width="2"/>
+  <polygon points="72,55 90,88 50,88" fill="#FFD4A8"/>
+  <!-- Right ear -->
+  <polygon points="191,45 221,95 161,95" fill="#FF8C42" stroke="#E07030" stroke-width="2"/>
+  <polygon points="184,55 206,88 166,88" fill="#FFD4A8"/>
+  <!-- Head -->
+  <ellipse cx="128" cy="135" rx="75" ry="65" fill="#FF8C42"/>
+  <!-- White face -->
+  <ellipse cx="128" cy="150" rx="50" ry="45" fill="#FFF5E6"/>
+  <!-- Eyes -->
+  <ellipse cx="105" cy="125" rx="10" ry="12" fill="#2D1B00"/>
+  <ellipse cx="151" cy="125" rx="10" ry="12" fill="#2D1B00"/>
+  <!-- Eye shine -->
+  <circle cx="108" cy="121" r="4" fill="white"/>
+  <circle cx="154" cy="121" r="4" fill="white"/>
+  <!-- Nose -->
+  <ellipse cx="128" cy="145" rx="7" ry="5" fill="#2D1B00"/>
+  <!-- Mouth -->
+  <path d="M120,152 Q128,162 136,152" fill="none" stroke="#2D1B00" stroke-width="2" stroke-linecap="round"/>
+  <!-- Cheeks -->
+  <circle cx="90" cy="142" r="10" fill="#FFB6C1" opacity="0.5"/>
+  <circle cx="166" cy="142" r="10" fill="#FFB6C1" opacity="0.5"/>
+  <!-- Heart -->
+  <g transform="translate(128,195) scale(0.6)">
+    <path d="M0,-15 C-20,-40 -50,-10 0,25 C50,-10 20,-40 0,-15Z" fill="#FF6B9D"/>
+  </g>
+</svg>

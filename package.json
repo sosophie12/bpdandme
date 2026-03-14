@@ -1,0 +1,45 @@
+{
+  "name": "sophie-app",
+  "version": "1.0.0",
+  "description": "Sophie — Ton compagnon de bien-être mental",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable",
+    "build-installer": "electron-builder --win nsis"
+  },
+  "author": "Sophie",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.sophie.wellbeing",
+    "productName": "Sophie",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "icon.png",
+      "icons/**"
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "icon.png"
+    },
+    "portable": {
+      "artifactName": "Sophie.exe"
+    },
+    "nsis": {
+      "oneClick": true,
+      "installerIcon": "icon.png",
+      "uninstallerIcon": "icon.png",
+      "artifactName": "Sophie-Setup.exe"
+    }
+  }
+}

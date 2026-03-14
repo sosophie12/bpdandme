@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sophie — Ton compagnon de bien-être</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+        :root {
+            --bg: #f0e6f6;
+            --card: #ffffff;
+            --primary: #9b72cf;
+            --primary-light: #c4a6e6;
+            --primary-dark: #7b52af;
+            --accent: #f2a7c3;
+            --accent-light: #fce4ec;
+            --text: #4a3560;
+            --text-light: #8a7a9a;
+            --success: #81c784;
+            --warning: #ffb74d;
+            --danger: #e57373;
+            --calm: #81d4fa;
+            --shadow: 0 4px 20px rgba(155, 114, 207, 0.15);
+            --radius: 18px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== ÉCRAN DE BIENVENUE ===== */
+        .welcome-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #c4a6e6 0%, #f2a7c3 50%, #81d4fa 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .welcome-screen.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+        .welcome-content {
+            text-align: center;
+            color: white;
+            padding: 2rem;
+        }
+        .welcome-pet {
+            font-size: 6rem;
+            animation: welcomeBounce 2s ease-in-out infinite;
+        }
+        .welcome-content h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 1rem 0 0.5rem;
+        }
+        .welcome-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            max-width: 400px;
+        }
+        .welcome-input {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+        .welcome-input input {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: 'Nunito', sans-serif;
+            width: 280px;
+            text-align: center;
+            outline: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .welcome-input button {
+            padding: 14px 40px;
+            border: none;
+            border-radius: 50px;
+            background: white;
+            color: var(--primary-dark);
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .welcome-input button:hover { transform: scale(1.05); }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(155,114,207,0.3);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .header-left h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 700;
+        }
+        .xp-badge, .streak-badge {
+            background: rgba(255,255,255,0.25);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .main-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-bottom: 90px;
+        }
+
+        /* ===== COMPAGNON ===== */
+        .pet-section {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .pet-bg {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, #f3e8ff 0%, #fce4ec 50%, #e3f2fd 100%);
+            opacity: 0.5;
+        }
+        .pet-content {
+            position: relative;
+            z-index: 1;
+        }
+        .pet-avatar {
+            font-size: 5rem;
+            animation: petIdle 3s ease-in-out infinite;
+            cursor: pointer;
+            transition: transform 0.3s;
+            user-select: none;
+        }
+        .pet-avatar:hover { transform: scale(1.1); }
+        .pet-avatar.happy { animation: petHappy 0.6s ease-in-out 3; }
+        .pet-name {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin: 0.5rem 0 0.2rem;
+        }
+        .pet-mood {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        .pet-level-bar {
+            margin-top: 0.8rem;
+            background: var(--bg);
+            border-radius: 50px;
+            height: 10px;
+            overflow: hidden;
+        }
+        .pet-level-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 50px;
+            transition: width 0.8s ease;
+        }
+        .pet-level-text {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+        .pet-message {
+            margin-top: 0.8rem;
+            background: var(--bg);
+            border-radius: 15px;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+        }
+        .pet-message::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid var(--bg);
+        }
+
+        /* ===== HUMEUR ===== */
+        .mood-section {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 1.2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+        }
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+        }
+        .mood-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 4px;
+            border: 2px solid transparent;
+            border-radius: 14px;
+            background: var(--bg);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Nunito', sans-serif;
+        }
+        .mood-btn:hover { border-color: var(--primary-light); transform: translateY(-2px); }
+        .mood-btn.active { border-color: var(--primary); background: #f3e8ff; }
+        .mood-btn .mood-emoji { font-size: 1.6rem; }
+        .mood-btn .mood-label { font-size: 0.7rem; font-weight: 600; color: var(--text-light); }
+
+        .mood-intensity {
+            margin-top: 0.8rem;
+            display: none;
+        }
+        .mood-intensity.visible { display: block; }
+        .mood-intensity label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .intensity-slider {
+            width: 100%;
+            accent-color: var(--primary);
+        }
+        .intensity-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-light);
+        }
+        .mood-save-btn {
+            margin-top: 0.8rem;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: none;
+        }
+        .mood-save-btn.visible { display: block; }
+        .mood-save-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(155,114,207,0.4); }
+
+        /* ===== ONGLETS ===== */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 50px;
+            background: var(--card);
+            color: var(--text-light);
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+        }
+
+        /* ===== QUÊTES ===== */
+        .quest-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 1rem 1.2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+        .quest-card[data-category="pleine-conscience"] { border-left-color: var(--calm); }
+        .quest-card[data-category="tolerance"] { border-left-color: var(--warning); }
+        .quest-card[data-category="regulation"] { border-left-color: var(--primary); }
+        .quest-card[data-category="relations"] { border-left-color: var(--accent); }
+        .quest-card[data-category="soin"] { border-left-color: var(--success); }
+
+        .quest-card.completed {
+            opacity: 0.6;
+            transform: scale(0.98);
+        }
+        .quest-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .quest-info { flex: 1; }
+        .quest-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .quest-desc {
+            font-size: 0.82rem;
+            color: var(--text-light);
+            line-height: 1.4;
+            margin-bottom: 6px;
+        }
+        .quest-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+        .quest-xp {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: #f3e8ff;
+            padding: 2px 10px;
+            border-radius: 50px;
+        }
+        .quest-tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 50px;
+            background: var(--bg);
+            color: var(--text-light);
+        }
+        .quest-check {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            align-self: center;
+            font-size: 1rem;
+        }
+        .quest-check:hover { background: var(--primary-light); border-color: var(--primary); }
+        .quest-check.done {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        /* ===== SOS / EXERCICES ===== */
+        .sos-section {
+            display: none;
+        }
+        .sos-section.active { display: block; }
+        .sos-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 1.3rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .sos-card:hover { transform: translateY(-3px); box-shadow: 0 6px 25px rgba(155,114,207,0.25); }
+        .sos-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .sos-emoji { font-size: 1.8rem; }
+        .sos-title { font-weight: 700; font-size: 1rem; }
+        .sos-desc {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        /* ===== EXERCICE GUIDÉ ===== */
+        .exercise-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(74, 53, 96, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .exercise-overlay.active { display: flex; }
+        .exercise-modal {
+            background: var(--card);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalIn 0.4s ease;
+        }
+        .exercise-modal h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        .exercise-step {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin: 1.5rem 0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .exercise-step .big-emoji {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .exercise-progress {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+        .exercise-btns {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+        }
+        .exercise-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .exercise-btn:hover { transform: scale(1.05); }
+        .exercise-btn.primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+        }
+        .exercise-btn.secondary {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        /* ===== BREATHING CIRCLE ===== */
+        .breathing-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light), var(--calm));
+            margin: 1rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            transition: transform 4s ease-in-out;
+        }
+        .breathing-circle.inhale { transform: scale(1.4); }
+        .breathing-circle.exhale { transform: scale(0.8); }
+
+        /* ===== JOURNAL ===== */
+        .journal-section { display: none; }
+        .journal-section.active { display: block; }
+        .journal-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 1.2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+        }
+        .journal-textarea {
+            width: 100%;
+            border: 2px solid var(--bg);
+            border-radius: 14px;
+            padding: 12px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 120px;
+            outline: none;
+            transition: border-color 0.2s;
+            color: var(--text);
+        }
+        .journal-textarea:focus { border-color: var(--primary-light); }
+        .journal-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.8rem;
+        }
+        .journal-prompt {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 50px;
+            background: var(--bg);
+            color: var(--text-light);
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .journal-prompt:hover { background: var(--primary-light); color: white; }
+        .journal-entry {
+            background: var(--bg);
+            border-radius: 14px;
+            padding: 1rem;
+            margin-bottom: 0.6rem;
+        }
+        .journal-entry-date {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .journal-entry-mood { font-size: 1.2rem; float: right; }
+        .journal-entry-text {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        /* ===== STATS ===== */
+        .stats-section { display: none; }
+        .stats-section.active { display: block; }
+        .stat-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 1.2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 0.8rem;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--bg);
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .mood-history {
+            display: flex;
+            gap: 3px;
+            margin-top: 0.8rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        .mood-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            background: var(--bg);
+        }
+
+        /* ===== NAVIGATION ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 env(safe-area-inset-bottom, 8px);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            z-index: 100;
+        }
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 6px 12px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            color: var(--text-light);
+            transition: color 0.2s;
+        }
+        .nav-btn .nav-icon { font-size: 1.4rem; }
+        .nav-btn .nav-label { font-size: 0.7rem; font-weight: 700; }
+        .nav-btn.active { color: var(--primary); }
+        .nav-btn.sos-nav {
+            background: linear-gradient(135deg, var(--danger), var(--warning));
+            color: white;
+            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            margin-top: -20px;
+            box-shadow: 0 4px 15px rgba(229,115,115,0.4);
+            justify-content: center;
+            padding: 0;
+        }
+        .nav-btn.sos-nav .nav-label { display: none; }
+        .nav-btn.sos-nav .nav-icon { font-size: 1.5rem; }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes welcomeBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes petIdle {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(-2deg); }
+            75% { transform: translateY(-4px) rotate(2deg); }
+        }
+        @keyframes petHappy {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(-10deg); }
+            75% { transform: scale(1.2) rotate(10deg); }
+        }
+        @keyframes modalIn {
+            from { transform: scale(0.8) translateY(30px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+        }
+        .confetti-particle {
+            position: fixed;
+            font-size: 1.5rem;
+            pointer-events: none;
+            z-index: 300;
+            animation: confetti 1.5s ease-out forwards;
+        }
+
+        /* ===== QUEST SECTIONS ===== */
+        .quest-section { display: none; }
+        .quest-section.active { display: block; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 380px) {
+            .mood-grid { grid-template-columns: repeat(5, 1fr); gap: 0.3rem; }
+            .mood-btn { padding: 8px 2px; }
+            .mood-btn .mood-emoji { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== ÉCRAN DE BIENVENUE ===== -->
+<div class="welcome-screen" id="welcomeScreen">
+    <div class="welcome-content">
+        <div class="welcome-pet">🦊</div>
+        <h1>Bienvenue !</h1>
+        <p>Je suis ton compagnon de bien-être. Ensemble, on va grandir et prendre soin de toi, un petit pas à la fois.</p>
+        <div class="welcome-input">
+            <input type="text" id="usernameInput" placeholder="Ton prénom..." maxlength="20">
+            <button onclick="startApp()">Commencer l'aventure</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== APPLICATION ===== -->
+<div id="app" style="display:none;">
+    <!-- HEADER -->
+    <header class="app-header">
+        <div class="header-left">
+            <span style="font-size:1.4rem;">🦊</span>
+            <h1>Sophie</h1>
+        </div>
+        <div class="header-right">
+            <div class="streak-badge">🔥 <span id="streakCount">0</span>j</div>
+            <div class="xp-badge">⭐ <span id="totalXp">0</span> XP</div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- COMPAGNON -->
+        <div class="pet-section" id="petSection">
+            <div class="pet-bg"></div>
+            <div class="pet-content">
+                <div class="pet-avatar" id="petAvatar" onclick="petPat()">🦊</div>
+                <div class="pet-name" id="petName">Kitsune</div>
+                <div class="pet-mood" id="petMoodText">Niv. 1 — Bébé renard</div>
+                <div class="pet-level-bar">
+                    <div class="pet-level-fill" id="petLevelFill" style="width: 0%"></div>
+                </div>
+                <div class="pet-level-text" id="petLevelText">0 / 100 XP pour le prochain niveau</div>
+                <div class="pet-message" id="petMessage">Salut ! Je suis content de te rencontrer ! 🌟</div>
+            </div>
+        </div>
+
+        <!-- HUMEUR -->
+        <div class="mood-section" id="moodSection">
+            <div class="section-title">🎨 Comment tu te sens maintenant ?</div>
+            <div class="mood-grid">
+                <button class="mood-btn" data-mood="super" onclick="selectMood(this)">
+                    <span class="mood-emoji">😄</span>
+                    <span class="mood-label">Super</span>
+                </button>
+                <button class="mood-btn" data-mood="bien" onclick="selectMood(this)">
+                    <span class="mood-emoji">🙂</span>
+                    <span class="mood-label">Bien</span>
+                </button>
+                <button class="mood-btn" data-mood="neutre" onclick="selectMood(this)">
+                    <span class="mood-emoji">😐</span>
+                    <span class="mood-label">Neutre</span>
+                </button>
+                <button class="mood-btn" data-mood="pas-top" onclick="selectMood(this)">
+                    <span class="mood-emoji">😔</span>
+                    <span class="mood-label">Pas top</span>
+                </button>
+                <button class="mood-btn" data-mood="mal" onclick="selectMood(this)">
+                    <span class="mood-emoji">😢</span>
+                    <span class="mood-label">Difficile</span>
+                </button>
+            </div>
+            <div class="mood-intensity" id="moodIntensity">
+                <label>Intensité : <span id="intensityValue">5</span>/10</label>
+                <input type="range" class="intensity-slider" min="1" max="10" value="5" oninput="updateIntensity(this.value)">
+                <div class="intensity-labels"><span>Légère</span><span>Forte</span></div>
+            </div>
+            <button class="mood-save-btn" id="moodSaveBtn" onclick="saveMood()">Enregistrer mon humeur 💜</button>
+        </div>
+
+        <!-- ONGLETS -->
+        <div class="tabs" id="mainTabs">
+            <button class="tab-btn active" onclick="switchTab('quests')">🗡️ Quêtes</button>
+            <button class="tab-btn" onclick="switchTab('sos')">🆘 SOS</button>
+            <button class="tab-btn" onclick="switchTab('journal')">📔 Journal</button>
+            <button class="tab-btn" onclick="switchTab('stats')">📊 Stats</button>
+        </div>
+
+        <!-- QUÊTES -->
+        <div class="quest-section active" id="questsSection">
+            <div class="section-title" style="margin-bottom: 0.5rem;">
+                🌅 Quêtes du jour
+                <span style="margin-left:auto; font-size:0.8rem; color:var(--text-light);" id="questProgress">0/5</span>
+            </div>
+            <div id="questList"></div>
+        </div>
+
+        <!-- SOS -->
+        <div class="sos-section" id="sosSection">
+            <div class="section-title">🆘 Outils d'urgence</div>
+            <div class="sos-card" onclick="startExercise('breathing')">
+                <div class="sos-card-header">
+                    <span class="sos-emoji">🌬️</span>
+                    <span class="sos-title">Respiration guidée</span>
+                </div>
+                <div class="sos-desc">Exercice de respiration 4-7-8 pour calmer ton système nerveux rapidement.</div>
+            </div>
+            <div class="sos-card" onclick="startExercise('grounding')">
+                <div class="sos-card-header">
+                    <span class="sos-emoji">🌍</span>
+                    <span class="sos-title">Ancrage 5-4-3-2-1</span>
+                </div>
+                <div class="sos-desc">Technique d'ancrage sensoriel pour revenir dans le moment présent.</div>
+            </div>
+            <div class="sos-card" onclick="startExercise('ice')">
+                <div class="sos-card-header">
+                    <span class="sos-emoji">🧊</span>
+                    <span class="sos-title">Technique TIPP</span>
+                </div>
+                <div class="sos-desc">Température, Intensité physique, Respiration contrôlée, Relaxation musculaire.</div>
+            </div>
+            <div class="sos-card" onclick="startExercise('safe')">
+                <div class="sos-card-header">
+                    <span class="sos-emoji">🏡</span>
+                    <span class="sos-title">Lieu sûr intérieur</span>
+                </div>
+                <div class="sos-desc">Visualisation guidée pour créer un espace de sécurité dans ton esprit.</div>
+            </div>
+            <div class="sos-card" onclick="startExercise('opposite')">
+                <div class="sos-card-header">
+                    <span class="sos-emoji">🔄</span>
+                    <span class="sos-title">Action opposée</span>
+                </div>
+                <div class="sos-desc">Identifie ton émotion et agis à l'opposé de ce qu'elle te pousse à faire.</div>
+            </div>
+        </div>
+
+        <!-- JOURNAL -->
+        <div class="journal-section" id="journalSection">
+            <div class="journal-card">
+                <div class="section-title">📝 Écris tes pensées</div>
+                <div class="journal-prompts">
+                    <button class="journal-prompt" onclick="setPrompt('Aujourd\'hui, je suis reconnaissant·e pour...')">Gratitude</button>
+                    <button class="journal-prompt" onclick="setPrompt('En ce moment, je ressens...')">Émotions</button>
+                    <button class="journal-prompt" onclick="setPrompt('Quelque chose qui m\'a fait du bien aujourd\'hui...')">Positif</button>
+                    <button class="journal-prompt" onclick="setPrompt('Ce qui me préoccupe en ce moment...')">Préoccupations</button>
+                    <button class="journal-prompt" onclick="setPrompt('Demain, j\'aimerais...')">Demain</button>
+                </div>
+                <textarea class="journal-textarea" id="journalInput" placeholder="Écris librement, cet espace est rien qu'à toi... 💜"></textarea>
+                <button class="mood-save-btn visible" style="margin-top:0.8rem" onclick="saveJournal()">Sauvegarder 📔</button>
+            </div>
+            <div class="section-title" style="margin-top:0.5rem;">📚 Entrées précédentes</div>
+            <div id="journalEntries"></div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-section" id="statsSection">
+            <div class="stat-card">
+                <div class="section-title">📊 Ton parcours</div>
+                <div class="stat-row">
+                    <span class="stat-label">🦊 Niveau</span>
+                    <span class="stat-value" id="statLevel">1</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">⭐ XP Total</span>
+                    <span class="stat-value" id="statXp">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">✅ Quêtes complétées</span>
+                    <span class="stat-value" id="statQuests">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">🔥 Série actuelle</span>
+                    <span class="stat-value" id="statStreak">0 jours</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">📔 Entrées journal</span>
+                    <span class="stat-value" id="statJournal">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="section-title">🎨 Historique d'humeur (7 derniers jours)</div>
+                <div class="mood-history" id="moodHistory"></div>
+            </div>
+            <div class="stat-card">
+                <div class="section-title">🏆 Badges débloqués</div>
+                <div id="badgesList" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="navTo('home')">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Accueil</span>
+        </button>
+        <button class="nav-btn" onclick="navTo('quests')">
+            <span class="nav-icon">🗡️</span>
+            <span class="nav-label">Quêtes</span>
+        </button>
+        <button class="nav-btn sos-nav" onclick="switchTab('sos')">
+            <span class="nav-icon">SOS</span>
+        </button>
+        <button class="nav-btn" onclick="navTo('journal')">
+            <span class="nav-icon">📔</span>
+            <span class="nav-label">Journal</span>
+        </button>
+        <button class="nav-btn" onclick="navTo('stats')">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Stats</span>
+        </button>
+    </nav>
+</div>
+
+<!-- ===== EXERCICE OVERLAY ===== -->
+<div class="exercise-overlay" id="exerciseOverlay">
+    <div class="exercise-modal">
+        <h2 id="exerciseTitle"></h2>
+        <div class="exercise-step" id="exerciseStep"></div>
+        <div class="exercise-progress" id="exerciseProgress"></div>
+        <div class="exercise-btns">
+            <button class="exercise-btn secondary" onclick="closeExercise()">Fermer</button>
+            <button class="exercise-btn primary" id="exerciseNextBtn" onclick="nextExerciseStep()">Suivant →</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ===== STATE =====
+let state = {
+    username: '',
+    petName: 'Kitsune',
+    xp: 0,
+    level: 1,
+    streak: 0,
+    lastActiveDate: null,
+    questsCompleted: 0,
+    todayMood: null,
+    todayMoodIntensity: 5,
+    moodHistory: [],
+    journal: [],
+    completedQuestIds: [],
+    todayDate: null,
+    badges: [],
+    petPats: 0
+};
+
+const PET_STAGES = [
+    { minLevel: 1, emoji: '🦊', name: 'Bébé renard' },
+    { minLevel: 3, emoji: '🐺', name: 'Renardeau' },
+    { minLevel: 5, emoji: '🦁', name: 'Jeune lion' },
+    { minLevel: 8, emoji: '🐉', name: 'Petit dragon' },
+    { minLevel: 12, emoji: '🦄', name: 'Licorne' },
+    { minLevel: 16, emoji: '🐲', name: 'Dragon sage' },
+    { minLevel: 20, emoji: '🌟', name: 'Étoile gardienne' },
+];
+
+const BADGES = [
+    { id: 'first_quest', name: 'Premier Pas', emoji: '👣', desc: 'Première quête complétée' },
+    { id: 'five_quests', name: 'Aventurier·e', emoji: '⚔️', desc: '5 quêtes complétées' },
+    { id: 'journal_start', name: 'Écrivain·e', emoji: '✍️', desc: 'Première entrée de journal' },
+    { id: 'streak_3', name: 'Régulier·e', emoji: '🔥', desc: '3 jours consécutifs' },
+    { id: 'streak_7', name: 'Persévérant·e', emoji: '💪', desc: '7 jours consécutifs' },
+    { id: 'level_5', name: 'Évolution', emoji: '🌱', desc: 'Niveau 5 atteint' },
+    { id: 'mood_7', name: 'Introspection', emoji: '🔮', desc: '7 humeurs enregistrées' },
+    { id: 'twenty_quests', name: 'Héros/Héroïne', emoji: '🏆', desc: '20 quêtes complétées' },
+    { id: 'pat_10', name: 'Ami·e fidèle', emoji: '💕', desc: '10 caresses au compagnon' },
+];
+
+// ===== QUÊTES (basées sur les compétences TCD/DBT) =====
+const ALL_QUESTS = [
+    // Pleine conscience
+    { id: 'mc1', cat: 'pleine-conscience', icon: '🧘', title: 'Moment présent', desc: 'Prends 3 minutes pour observer ta respiration sans la modifier.', xp: 15 },
+    { id: 'mc2', cat: 'pleine-conscience', icon: '🍵', title: 'Dégustation consciente', desc: 'Mange ou bois quelque chose en te concentrant sur chaque sensation.', xp: 15 },
+    { id: 'mc3', cat: 'pleine-conscience', icon: '👀', title: 'Observation pure', desc: 'Regarde par la fenêtre pendant 2 minutes et note 5 choses que tu vois.', xp: 10 },
+    { id: 'mc4', cat: 'pleine-conscience', icon: '🎵', title: 'Écoute active', desc: 'Écoute une chanson en portant attention à chaque instrument.', xp: 15 },
+    { id: 'mc5', cat: 'pleine-conscience', icon: '🌿', title: 'Scan corporel', desc: 'Parcours mentalement ton corps des pieds à la tête, sans jugement.', xp: 20 },
+
+    // Tolérance à la détresse
+    { id: 'td1', cat: 'tolerance', icon: '🧊', title: 'Sensation forte', desc: 'Tiens un glaçon ou passe de l'eau froide sur tes poignets pendant 30 secondes.', xp: 15 },
+    { id: 'td2', cat: 'tolerance', icon: '🎯', title: 'Distraction saine', desc: 'Fais un puzzle, du coloriage ou joue à un jeu pendant 15 minutes.', xp: 15 },
+    { id: 'td3', cat: 'tolerance', icon: '🌬️', title: 'Respiration 4-7-8', desc: 'Inspire 4s, retiens 7s, expire 8s. Répète 4 fois.', xp: 20 },
+    { id: 'td4', cat: 'tolerance', icon: '📋', title: 'Pour et contre', desc: 'Écris les pour et les contre d\'un comportement impulsif que tu veux éviter.', xp: 20 },
+    { id: 'td5', cat: 'tolerance', icon: '🌈', title: 'Améliorer le moment', desc: 'Trouve une petite chose agréable à faire maintenant (musique, thé, lumière douce).', xp: 10 },
+
+    // Régulation émotionnelle
+    { id: 're1', cat: 'regulation', icon: '📝', title: 'Nommer l\'émotion', desc: 'Identifie précisément l\'émotion que tu ressens (pas juste "mal" mais "frustré·e", "déçu·e", etc.).', xp: 15 },
+    { id: 're2', cat: 'regulation', icon: '🔍', title: 'Vérifier les faits', desc: 'Écris la situation, ton interprétation, et vérifie si d'autres interprétations sont possibles.', xp: 25 },
+    { id: 're3', cat: 'regulation', icon: '🔄', title: 'Action opposée', desc: 'Si tu as envie de t\'isoler, envoie un message à quelqu\'un. Si tu es en colère, fais un geste doux.', xp: 25 },
+    { id: 're4', cat: 'regulation', icon: '💤', title: 'Hygiène émotionnelle', desc: 'Assure-toi d'avoir dormi, mangé et bu suffisamment aujourd'hui.', xp: 15 },
+    { id: 're5', cat: 'regulation', icon: '📊', title: 'Échelle d\'émotion', desc: 'Note ton émotion sur 10. Observe si elle change au fil de la journée.', xp: 15 },
+
+    // Relations interpersonnelles
+    { id: 'ri1', cat: 'relations', icon: '💬', title: 'DEAR MAN', desc: 'Prépare une demande assertive : Décris, Exprime, Affirme, Renforce, reste Mindful, Agis confiant, Négocie.', xp: 30 },
+    { id: 'ri2', cat: 'relations', icon: '💌', title: 'Message bienveillant', desc: 'Envoie un message gentil à quelqu\'un (sans attendre de réponse).', xp: 15 },
+    { id: 'ri3', cat: 'relations', icon: '👂', title: 'Écoute sans juger', desc: 'Dans ta prochaine conversation, écoute sans interrompre ni préparer ta réponse.', xp: 20 },
+    { id: 'ri4', cat: 'relations', icon: '🤝', title: 'Valider quelqu\'un', desc: 'Dis à quelqu\'un que tu comprends ce qu\'il/elle ressent, sans essayer de corriger.', xp: 20 },
+    { id: 'ri5', cat: 'relations', icon: '🪞', title: 'Auto-validation', desc: 'Dis-toi : "Ce que je ressens est valide, même si c\'est inconfortable."', xp: 15 },
+
+    // Prendre soin de soi
+    { id: 'ps1', cat: 'soin', icon: '🚶', title: 'Marche douce', desc: 'Fais une promenade de 10 minutes en plein air.', xp: 15 },
+    { id: 'ps2', cat: 'soin', icon: '🥤', title: 'Hydratation', desc: 'Bois un grand verre d\'eau maintenant.', xp: 10 },
+    { id: 'ps3', cat: 'soin', icon: '🛁', title: 'Rituel de soin', desc: 'Prends soin de toi physiquement : douche, soin du visage, ou habille-toi confortablement.', xp: 15 },
+    { id: 'ps4', cat: 'soin', icon: '🎨', title: 'Expression créative', desc: 'Dessine, écris, chante ou fais quelque chose de créatif pendant 10 minutes.', xp: 20 },
+    { id: 'ps5', cat: 'soin', icon: '🌙', title: 'Routine de coucher', desc: 'Prépare une routine calme : pas d\'écran, lecture, tisane, lumière douce.', xp: 15 },
+];
+
+// ===== MESSAGES DU COMPAGNON =====
+const PET_MESSAGES = {
+    greeting: [
+        "Bonjour {name} ! Prêt·e pour une nouvelle journée ? 🌟",
+        "Hey {name} ! Je suis content de te voir ! 💜",
+        "Coucou {name} ! On fait de belles choses aujourd'hui ? 🌈",
+    ],
+    questComplete: [
+        "Bravo ! Tu es incroyable ! 🎉",
+        "Trop fier de toi ! Continue comme ça ! ⭐",
+        "Chaque petit pas compte. Tu gères ! 💪",
+        "Wow ! Tu grandis chaque jour ! 🌱",
+    ],
+    moodGood: [
+        "Content que tu te sentes bien ! Profitons-en ! ☀️",
+        "Ta bonne humeur me rend heureux aussi ! 🥰",
+    ],
+    moodBad: [
+        "Je suis là avec toi. C'est temporaire, ça va passer. 💜",
+        "C'est courageux de reconnaître comment tu te sens. Je suis fier de toi. 🌙",
+        "Tu n'es pas seul·e. Essaie un exercice SOS si tu veux. 🤗",
+        "Les émotions sont comme les vagues — elles arrivent et elles repartent. 🌊",
+    ],
+    pat: [
+        "Héhé, ça chatouille ! 🤭",
+        "J'adore les câlins ! 💕",
+        "Grrrr... (de bonheur) 🥰",
+        "Encore ! Encore ! 🐾",
+    ],
+    levelUp: [
+        "NIVEAU SUPÉRIEUR ! On évolue ensemble ! 🎊",
+    ],
+};
+
+// ===== EXERCICES =====
+const EXERCISES = {
+    breathing: {
+        title: '🌬️ Respiration 4-7-8',
+        steps: [
+            { text: '<span class="big-emoji">🌬️</span><br>Installe-toi confortablement.<br>On va faire 4 cycles de respiration.', hasCircle: false },
+            { text: 'Inspire par le nez...', action: 'inhale', duration: 4000, hasCircle: true },
+            { text: 'Retiens ta respiration...', action: 'hold', duration: 7000, hasCircle: true },
+            { text: 'Expire lentement par la bouche...', action: 'exhale', duration: 8000, hasCircle: true },
+            { text: 'Inspire par le nez...', action: 'inhale', duration: 4000, hasCircle: true },
+            { text: 'Retiens ta respiration...', action: 'hold', duration: 7000, hasCircle: true },
+            { text: 'Expire lentement par la bouche...', action: 'exhale', duration: 8000, hasCircle: true },
+            { text: 'Inspire par le nez...', action: 'inhale', duration: 4000, hasCircle: true },
+            { text: 'Retiens ta respiration...', action: 'hold', duration: 7000, hasCircle: true },
+            { text: 'Expire lentement par la bouche...', action: 'exhale', duration: 8000, hasCircle: true },
+            { text: 'Inspire une dernière fois...', action: 'inhale', duration: 4000, hasCircle: true },
+            { text: 'Retiens...', action: 'hold', duration: 7000, hasCircle: true },
+            { text: 'Et expire doucement...', action: 'exhale', duration: 8000, hasCircle: true },
+            { text: '<span class="big-emoji">✨</span><br>Bravo ! Comment tu te sens ?<br>Tu as gagné 20 XP ! 🌟', hasCircle: false },
+        ]
+    },
+    grounding: {
+        title: '🌍 Ancrage 5-4-3-2-1',
+        steps: [
+            { text: '<span class="big-emoji">🌍</span><br>On va se reconnecter au moment présent<br>en utilisant tes 5 sens.' },
+            { text: '<span class="big-emoji">👀</span><br>Nomme <strong>5 choses</strong> que tu peux <strong>VOIR</strong> autour de toi.<br><br>Prends ton temps...' },
+            { text: '<span class="big-emoji">✋</span><br>Nomme <strong>4 choses</strong> que tu peux <strong>TOUCHER</strong>.<br><br>Touche-les si possible.' },
+            { text: '<span class="big-emoji">👂</span><br>Nomme <strong>3 choses</strong> que tu peux <strong>ENTENDRE</strong>.<br><br>Ferme les yeux pour mieux écouter...' },
+            { text: '<span class="big-emoji">👃</span><br>Nomme <strong>2 choses</strong> que tu peux <strong>SENTIR</strong>.<br><br>Inspire profondément...' },
+            { text: '<span class="big-emoji">👅</span><br>Nomme <strong>1 chose</strong> que tu peux <strong>GOÛTER</strong>.<br><br>Ou le goût dans ta bouche maintenant.' },
+            { text: '<span class="big-emoji">🌟</span><br>Tu es ici, maintenant, en sécurité.<br>Tu as gagné 20 XP ! 💜' },
+        ]
+    },
+    ice: {
+        title: '🧊 Technique TIPP',
+        steps: [
+            { text: '<span class="big-emoji">🧊</span><br>La technique TIPP est très efficace<br>pour les émotions intenses.' },
+            { text: '<span class="big-emoji">🌡️</span><br><strong>T — Température</strong><br><br>Plonge ton visage dans de l\'eau froide ou applique de la glace sur ton cou pendant 30 secondes.' },
+            { text: '<span class="big-emoji">🏃</span><br><strong>I — Intensité physique</strong><br><br>Fais des mouvements intenses : jumping jacks, monter des escaliers, courir sur place pendant 1 minute.' },
+            { text: '<span class="big-emoji">🫁</span><br><strong>P — Respiration rythmée</strong><br><br>Expire plus longtemps que tu inspires.<br>Inspire 4s → Expire 8s. Répète 5 fois.' },
+            { text: '<span class="big-emoji">💆</span><br><strong>P — Relaxation musculaire</strong><br><br>Contracte chaque groupe musculaire 5 secondes, puis relâche. Des pieds au visage.' },
+            { text: '<span class="big-emoji">✨</span><br>Tu as utilisé ton corps pour calmer ton esprit. C\'est puissant !<br>Tu as gagné 25 XP ! 💪' },
+        ]
+    },
+    safe: {
+        title: '🏡 Lieu sûr intérieur',
+        steps: [
+            { text: '<span class="big-emoji">🏡</span><br>Ferme les yeux.<br>On va créer ensemble un lieu de sécurité dans ton esprit.' },
+            { text: 'Imagine un endroit où tu te sens<br><strong>parfaitement en sécurité</strong>.<br><br>Ça peut être réel ou imaginaire :<br>une plage, une forêt, une chambre douillette...' },
+            { text: '<span class="big-emoji">👀</span><br>Que <strong>vois-tu</strong> dans cet endroit ?<br>Les couleurs, la lumière, les formes...<br><br>Rends l\'image la plus vivante possible.' },
+            { text: '<span class="big-emoji">👂</span><br>Qu\'<strong>entends-tu</strong> ?<br>Des oiseaux ? De l\'eau ? Le vent ?<br>Un silence apaisant ?' },
+            { text: '<span class="big-emoji">🌡️</span><br>Que <strong>ressens-tu</strong> physiquement ?<br>La chaleur du soleil ? La douceur d\'une couverture ?<br>Le sol sous tes pieds ?' },
+            { text: '<span class="big-emoji">💜</span><br>Tu es en sécurité ici.<br>Personne ne peut te blesser dans cet endroit.<br><br>Prends le temps que tu veux...' },
+            { text: '<span class="big-emoji">🌟</span><br>Tu peux revenir ici quand tu veux.<br>Cet endroit t\'appartient pour toujours.<br><br>Tu as gagné 20 XP ! 🏡' },
+        ]
+    },
+    opposite: {
+        title: '🔄 Action opposée',
+        steps: [
+            { text: '<span class="big-emoji">🔄</span><br>L\'action opposée est une compétence puissante<br>pour changer la trajectoire de tes émotions.' },
+            { text: '<strong>Étape 1 : Identifie ton émotion</strong><br><br>😢 Tristesse → envie de s\'isoler<br>😠 Colère → envie d\'attaquer<br>😰 Peur → envie de fuir<br>😔 Honte → envie de se cacher' },
+            { text: '<strong>Étape 2 : Vérifie les faits</strong><br><br>Est-ce que ton émotion correspond à la situation ?<br>Est-ce proportionnel ?<br><br>Si non → l\'action opposée est utile !' },
+            { text: '<strong>Étape 3 : Fais l\'opposé</strong><br><br>😢 Tristesse → Sors, bouge, appelle quelqu\'un<br>😠 Colère → Fais un geste doux, parle doucement<br>😰 Peur → Approche-toi doucement de ce qui te fait peur<br>😔 Honte → Partage avec quelqu\'un de confiance' },
+            { text: '<strong>Étape 4 : Engage-toi à 100%</strong><br><br>Fais l\'action opposée avec tout ton corps :<br>ta posture, ton visage, ton ton de voix.<br><br>L\'émotion va suivre le corps. 💪' },
+            { text: '<span class="big-emoji">✨</span><br>Tu as le pouvoir de changer<br>la direction de tes émotions.<br><br>Tu as gagné 25 XP ! 🔄' },
+        ]
+    }
+};
+
+let currentExercise = null;
+let currentStep = 0;
+let breathingTimer = null;
+
+// ===== PERSISTENCE =====
+function saveState() {
+    localStorage.setItem('sophie_state', JSON.stringify(state));
+}
+
+function loadState() {
+    const saved = localStorage.getItem('sophie_state');
+    if (saved) {
+        state = { ...state, ...JSON.parse(saved) };
+        return true;
+    }
+    return false;
+}
+
+// ===== INITIALISATION =====
+function startApp() {
+    const name = document.getElementById('usernameInput').value.trim();
+    if (!name) {
+        document.getElementById('usernameInput').placeholder = 'Dis-moi ton prénom 😊';
+        document.getElementById('usernameInput').focus();
+        return;
+    }
+    state.username = name;
+    state.todayDate = getTodayStr();
+    state.lastActiveDate = getTodayStr();
+    saveState();
+
+    document.getElementById('welcomeScreen').classList.add('hidden');
+    setTimeout(() => {
+        document.getElementById('welcomeScreen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        initApp();
+    }, 800);
+}
+
+function initApp() {
+    checkNewDay();
+    updatePet();
+    generateDailyQuests();
+    updateUI();
+    showPetMessage('greeting');
+}
+
+function getTodayStr() {
+    return new Date().toISOString().slice(0, 10);
+}
+
+function checkNewDay() {
+    const today = getTodayStr();
+    if (state.todayDate !== today) {
+        // Nouveau jour
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+        if (state.lastActiveDate === yesterdayStr) {
+            state.streak++;
+        } else if (state.lastActiveDate !== today) {
+            state.streak = 1;
+        }
+
+        state.todayDate = today;
+        state.lastActiveDate = today;
+        state.todayMood = null;
+        state.completedQuestIds = [];
+        saveState();
+    }
+}
+
+// ===== PET =====
+function updatePet() {
+    let stage = PET_STAGES[0];
+    for (const s of PET_STAGES) {
+        if (state.level >= s.minLevel) stage = s;
+    }
+
+    document.getElementById('petAvatar').textContent = stage.emoji;
+    document.getElementById('petName').textContent = state.petName;
+
+    const xpForLevel = state.level * 100;
+    const currentLevelXp = state.xp % xpForLevel;
+    const fillPercent = (currentLevelXp / xpForLevel) * 100;
+
+    document.getElementById('petMoodText').textContent = `Niv. ${state.level} — ${stage.name}`;
+    document.getElementById('petLevelFill').style.width = fillPercent + '%';
+    document.getElementById('petLevelText').textContent = `${currentLevelXp} / ${xpForLevel} XP pour le prochain niveau`;
+
+    // Header
+    const headerEmoji = document.querySelector('.header-left span');
+    if (headerEmoji) headerEmoji.textContent = stage.emoji;
+}
+
+function addXp(amount) {
+    state.xp += amount;
+    const xpForLevel = state.level * 100;
+
+    while (state.xp >= state.level * 100) {
+        state.xp -= state.level * 100;
+        state.level++;
+        showPetMessage('levelUp');
+        checkBadge('level_5', state.level >= 5);
+    }
+
+    updatePet();
+    updateUI();
+    saveState();
+}
+
+function petPat() {
+    state.petPats++;
+    const avatar = document.getElementById('petAvatar');
+    avatar.classList.add('happy');
+    setTimeout(() => avatar.classList.remove('happy'), 1800);
+    showPetMessage('pat');
+    checkBadge('pat_10', state.petPats >= 10);
+    saveState();
+}
+
+function showPetMessage(type) {
+    const messages = PET_MESSAGES[type];
+    if (!messages) return;
+    const msg = messages[Math.floor(Math.random() * messages.length)];
+    document.getElementById('petMessage').textContent = msg.replace('{name}', state.username);
+}
+
+// ===== HUMEUR =====
+function selectMood(btn) {
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('moodIntensity').classList.add('visible');
+    document.getElementById('moodSaveBtn').classList.add('visible');
+}
+
+function updateIntensity(val) {
+    document.getElementById('intensityValue').textContent = val;
+    state.todayMoodIntensity = parseInt(val);
+}
+
+function saveMood() {
+    const activeBtn = document.querySelector('.mood-btn.active');
+    if (!activeBtn) return;
+
+    const mood = activeBtn.dataset.mood;
+    state.todayMood = mood;
+
+    const moodEmojis = { super: '😄', bien: '🙂', neutre: '😐', 'pas-top': '😔', mal: '😢' };
+
+    state.moodHistory.push({
+        date: getTodayStr(),
+        mood: mood,
+        emoji: moodEmojis[mood],
+        intensity: state.todayMoodIntensity,
+        time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    });
+
+    // Garder les 30 derniers
+    if (state.moodHistory.length > 30) state.moodHistory = state.moodHistory.slice(-30);
+
+    addXp(10);
+    saveState();
+
+    const isBad = mood === 'pas-top' || mood === 'mal';
+    showPetMessage(isBad ? 'moodBad' : 'moodGood');
+
+    checkBadge('mood_7', state.moodHistory.length >= 7);
+
+    // Feedback visuel
+    document.getElementById('moodSaveBtn').textContent = 'Enregistré ! 💜';
+    document.getElementById('moodSaveBtn').style.background = 'var(--success)';
+    setTimeout(() => {
+        document.getElementById('moodSaveBtn').textContent = 'Enregistrer mon humeur 💜';
+        document.getElementById('moodSaveBtn').style.background = '';
+    }, 2000);
+
+    updateUI();
+}
+
+// ===== QUÊTES =====
+function generateDailyQuests() {
+    // Sélectionner 5 quêtes variées par jour
+    const today = getTodayStr();
+    const seed = hashStr(today);
+    const categories = ['pleine-conscience', 'tolerance', 'regulation', 'relations', 'soin'];
+    let quests = [];
+
+    for (const cat of categories) {
+        const catQuests = ALL_QUESTS.filter(q => q.cat === cat);
+        const idx = seed % catQuests.length;
+        quests.push(catQuests[idx]);
+    }
+
+    renderQuests(quests);
+}
+
+function hashStr(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return Math.abs(hash);
+}
+
+function renderQuests(quests) {
+    const container = document.getElementById('questList');
+    container.innerHTML = '';
+
+    const catLabels = {
+        'pleine-conscience': 'Pleine conscience',
+        'tolerance': 'Tolérance à la détresse',
+        'regulation': 'Régulation émotionnelle',
+        'relations': 'Relations',
+        'soin': 'Soin de soi'
+    };
+
+    quests.forEach(q => {
+        const done = state.completedQuestIds.includes(q.id);
+        const card = document.createElement('div');
+        card.className = `quest-card ${done ? 'completed' : ''}`;
+        card.dataset.category = q.cat;
+        card.innerHTML = `
+            <span class="quest-icon">${q.icon}</span>
+            <div class="quest-info">
+                <div class="quest-title">${q.title}</div>
+                <div class="quest-desc">${q.desc}</div>
+                <div class="quest-meta">
+                    <span class="quest-xp">+${q.xp} XP</span>
+                    <span class="quest-tag">${catLabels[q.cat]}</span>
+                </div>
+            </div>
+            <div class="quest-check ${done ? 'done' : ''}" onclick="completeQuest('${q.id}', ${q.xp}, this)">
+                ${done ? '✓' : ''}
+            </div>
+        `;
+        container.appendChild(card);
+    });
+
+    updateQuestProgress();
+}
+
+function completeQuest(id, xp, checkEl) {
+    if (state.completedQuestIds.includes(id)) return;
+
+    state.completedQuestIds.push(id);
+    state.questsCompleted++;
+
+    checkEl.classList.add('done');
+    checkEl.textContent = '✓';
+    checkEl.closest('.quest-card').classList.add('completed');
+
+    addXp(xp);
+    showPetMessage('questComplete');
+    spawnConfetti();
+
+    checkBadge('first_quest', state.questsCompleted >= 1);
+    checkBadge('five_quests', state.questsCompleted >= 5);
+    checkBadge('twenty_quests', state.questsCompleted >= 20);
+
+    updateQuestProgress();
+    saveState();
+}
+
+function updateQuestProgress() {
+    const total = 5;
+    const done = state.completedQuestIds.length;
+    const el = document.getElementById('questProgress');
+    if (el) el.textContent = `${done}/${total}`;
+}
+
+// ===== EXERCICES =====
+function startExercise(type) {
+    currentExercise = EXERCISES[type];
+    currentStep = 0;
+    document.getElementById('exerciseOverlay').classList.add('active');
+    document.getElementById('exerciseTitle').textContent = currentExercise.title;
+    showExerciseStep();
+}
+
+function showExerciseStep() {
+    if (!currentExercise) return;
+    const step = currentExercise.steps[currentStep];
+    const stepEl = document.getElementById('exerciseStep');
+    const progressEl = document.getElementById('exerciseProgress');
+    const nextBtn = document.getElementById('exerciseNextBtn');
+
+    // Clear previous timer
+    if (breathingTimer) clearTimeout(breathingTimer);
+
+    let html = '';
+
+    if (step.hasCircle) {
+        html += '<div style="text-align:center">';
+        html += `<div class="breathing-circle" id="breathCircle">${step.text}</div>`;
+        html += '</div>';
+    } else {
+        html = step.text;
+    }
+
+    stepEl.innerHTML = html;
+    progressEl.textContent = `${currentStep + 1} / ${currentExercise.steps.length}`;
+
+    const isLast = currentStep === currentExercise.steps.length - 1;
+    nextBtn.textContent = isLast ? 'Terminer ✨' : 'Suivant →';
+
+    // Breathing animation
+    if (step.action) {
+        const circle = document.getElementById('breathCircle');
+        if (circle) {
+            circle.className = 'breathing-circle';
+            if (step.action === 'inhale') {
+                setTimeout(() => circle.classList.add('inhale'), 100);
+            } else if (step.action === 'exhale') {
+                setTimeout(() => circle.classList.add('exhale'), 100);
+            }
+
+            if (step.duration) {
+                nextBtn.disabled = true;
+                nextBtn.style.opacity = '0.5';
+                breathingTimer = setTimeout(() => {
+                    nextBtn.disabled = false;
+                    nextBtn.style.opacity = '1';
+                    // Auto avance
+                    nextExerciseStep();
+                }, step.duration);
+            }
+        }
+    }
+}
+
+function nextExerciseStep() {
+    if (breathingTimer) clearTimeout(breathingTimer);
+
+    if (currentStep < currentExercise.steps.length - 1) {
+        currentStep++;
+        showExerciseStep();
+    } else {
+        closeExercise();
+        // XP reward
+        addXp(20);
+        showPetMessage('questComplete');
+        spawnConfetti();
+    }
+}
+
+function closeExercise() {
+    if (breathingTimer) clearTimeout(breathingTimer);
+    document.getElementById('exerciseOverlay').classList.remove('active');
+    currentExercise = null;
+    currentStep = 0;
+}
+
+// ===== JOURNAL =====
+function setPrompt(text) {
+    document.getElementById('journalInput').value = text;
+    document.getElementById('journalInput').focus();
+}
+
+function saveJournal() {
+    const text = document.getElementById('journalInput').value.trim();
+    if (!text) return;
+
+    const moodEmojis = { super: '😄', bien: '🙂', neutre: '😐', 'pas-top': '😔', mal: '😢' };
+    const entry = {
+        date: new Date().toLocaleString('fr-FR'),
+        text: text,
+        mood: state.todayMood ? moodEmojis[state.todayMood] : '📝'
+    };
+
+    state.journal.unshift(entry);
+    if (state.journal.length > 50) state.journal = state.journal.slice(0, 50);
+
+    document.getElementById('journalInput').value = '';
+    addXp(15);
+    saveState();
+
+    checkBadge('journal_start', state.journal.length >= 1);
+    renderJournal();
+    showPetMessage('questComplete');
+}
+
+function renderJournal() {
+    const container = document.getElementById('journalEntries');
+    container.innerHTML = '';
+
+    state.journal.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'journal-entry';
+        div.innerHTML = `
+            <span class="journal-entry-mood">${entry.mood}</span>
+            <div class="journal-entry-date">${entry.date}</div>
+            <div class="journal-entry-text">${escapeHtml(entry.text)}</div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ===== BADGES =====
+function checkBadge(id, condition) {
+    if (!condition || state.badges.includes(id)) return;
+    state.badges.push(id);
+    saveState();
+
+    const badge = BADGES.find(b => b.id === id);
+    if (badge) {
+        const msg = document.getElementById('petMessage');
+        msg.textContent = `🏆 Badge débloqué : ${badge.emoji} ${badge.name} — ${badge.desc}`;
+    }
+}
+
+function renderBadges() {
+    const container = document.getElementById('badgesList');
+    container.innerHTML = '';
+
+    BADGES.forEach(badge => {
+        const unlocked = state.badges.includes(badge.id);
+        const div = document.createElement('div');
+        div.style.cssText = `
+            background: ${unlocked ? '#f3e8ff' : 'var(--bg)'};
+            border-radius: 14px;
+            padding: 10px 14px;
+            text-align: center;
+            min-width: 90px;
+            opacity: ${unlocked ? '1' : '0.4'};
+        `;
+        div.innerHTML = `
+            <div style="font-size:1.8rem;">${unlocked ? badge.emoji : '🔒'}</div>
+            <div style="font-size:0.75rem;font-weight:700;margin-top:4px;">${badge.name}</div>
+            <div style="font-size:0.65rem;color:var(--text-light);">${badge.desc}</div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// ===== NAVIGATION =====
+function switchTab(tab) {
+    // Réinitialiser les onglets
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.quest-section, .sos-section, .journal-section, .stats-section').forEach(s => s.classList.remove('active'));
+
+    const tabMap = {
+        quests: { section: 'questsSection', tabIdx: 0 },
+        sos: { section: 'sosSection', tabIdx: 1 },
+        journal: { section: 'journalSection', tabIdx: 2 },
+        stats: { section: 'statsSection', tabIdx: 3 },
+    };
+
+    const t = tabMap[tab];
+    if (t) {
+        document.getElementById(t.section).classList.add('active');
+        const tabs = document.querySelectorAll('.tab-btn');
+        if (tabs[t.tabIdx]) tabs[t.tabIdx].classList.add('active');
+    }
+
+    // Scroll up
+    document.querySelector('.main-container').scrollTop = 0;
+
+    if (tab === 'journal') renderJournal();
+    if (tab === 'stats') { updateStats(); renderBadges(); }
+
+    // Nav active state
+    document.querySelectorAll('.nav-btn:not(.sos-nav)').forEach(b => b.classList.remove('active'));
+}
+
+function navTo(section) {
+    if (section === 'home') {
+        // Show pet + mood + quests
+        document.getElementById('petSection').style.display = 'block';
+        document.getElementById('moodSection').style.display = 'block';
+        switchTab('quests');
+
+        document.querySelectorAll('.nav-btn:not(.sos-nav)').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.nav-btn')[0].classList.add('active');
+        return;
+    }
+
+    const navMap = { quests: 1, journal: 3, stats: 4 };
+    switchTab(section);
+
+    document.querySelectorAll('.nav-btn:not(.sos-nav)').forEach(b => b.classList.remove('active'));
+    const idx = navMap[section];
+    if (idx !== undefined) document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+}
+
+// ===== UI UPDATE =====
+function updateUI() {
+    document.getElementById('totalXp').textContent = state.xp + (state.level - 1) * 100;
+    document.getElementById('streakCount').textContent = state.streak;
+    checkBadge('streak_3', state.streak >= 3);
+    checkBadge('streak_7', state.streak >= 7);
+}
+
+function updateStats() {
+    document.getElementById('statLevel').textContent = state.level;
+    document.getElementById('statXp').textContent = state.xp + (state.level - 1) * 100;
+    document.getElementById('statQuests').textContent = state.questsCompleted;
+    document.getElementById('statStreak').textContent = state.streak + ' jours';
+    document.getElementById('statJournal').textContent = state.journal.length;
+
+    // Mood history
+    const historyEl = document.getElementById('moodHistory');
+    historyEl.innerHTML = '';
+    const last7 = state.moodHistory.slice(-7);
+    last7.forEach(m => {
+        const dot = document.createElement('div');
+        dot.className = 'mood-dot';
+        dot.textContent = m.emoji;
+        dot.title = m.date;
+        historyEl.appendChild(dot);
+    });
+
+    if (last7.length === 0) {
+        historyEl.innerHTML = '<span style="font-size:0.85rem;color:var(--text-light);">Aucune humeur enregistrée pour le moment</span>';
+    }
+}
+
+// ===== CONFETTI =====
+function spawnConfetti() {
+    const emojis = ['⭐', '🌟', '✨', '💜', '🎉', '🦊'];
+    for (let i = 0; i < 8; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'confetti-particle';
+        particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        particle.style.left = (20 + Math.random() * 60) + 'vw';
+        particle.style.top = (30 + Math.random() * 40) + 'vh';
+        particle.style.animationDelay = (Math.random() * 0.5) + 's';
+        document.body.appendChild(particle);
+        setTimeout(() => particle.remove(), 2000);
+    }
+}
+
+// ===== BOOT =====
+window.addEventListener('DOMContentLoaded', () => {
+    if (loadState() && state.username) {
+        document.getElementById('welcomeScreen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        initApp();
+    }
+});
+</script>
+
+</body>
+</html>
