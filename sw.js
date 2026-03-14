@@ -28,3 +28,18 @@ self.addEventListener('fetch', event => {
     caches.match(event.request).then(cached => cached || fetch(event.request))
   );
 });
+
+// Notification click — open the app
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      for (const client of windowClients) {
+        if (client.url.includes('index.html') || client.url.endsWith('/')) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow('./');
+    })
+  );
+});

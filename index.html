@@ -635,6 +635,90 @@
             font-weight: 800;
             color: var(--primary);
         }
+        /* Toggle switch */
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--bg);
+        }
+        .toggle-row:last-child { border-bottom: none; }
+        .toggle-label {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .toggle-sublabel {
+            font-size: 0.72rem;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: #ddd;
+            border-radius: 26px;
+            transition: 0.3s;
+        }
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background: var(--primary);
+        }
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(22px);
+        }
+        .time-input {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            border: 2px solid var(--primary-light);
+            border-radius: 10px;
+            padding: 6px 10px;
+            font-size: 0.9rem;
+            color: var(--text);
+            font-weight: 700;
+            width: 90px;
+            text-align: center;
+        }
+        .notif-status {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        .notif-status.active {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .notif-status.inactive {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
         .mood-history {
             display: flex;
             gap: 3px;
@@ -925,6 +1009,46 @@
                 <div class="section-title">🏆 Badges débloqués</div>
                 <div id="badgesList" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem;"></div>
             </div>
+            <div class="stat-card" id="notifCard">
+                <div class="section-title">🔔 Notifications</div>
+                <div id="notifStatus"></div>
+                <div class="toggle-row">
+                    <div>
+                        <div class="toggle-label">🌅 Rappel du matin</div>
+                        <div class="toggle-sublabel">Nouvelles quêtes & check-in humeur</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input type="time" class="time-input" id="morningTime" value="09:00" onchange="saveNotifSettings()">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notifMorning" onchange="toggleNotif('morning')">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="toggle-row">
+                    <div>
+                        <div class="toggle-label">🌙 Rappel du soir</div>
+                        <div class="toggle-sublabel">Humeur & journal si pas fait</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input type="time" class="time-input" id="eveningTime" value="20:00" onchange="saveNotifSettings()">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notifEvening" onchange="toggleNotif('evening')">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="toggle-row">
+                    <div>
+                        <div class="toggle-label">🔥 Rappel de série</div>
+                        <div class="toggle-sublabel">Ne perds pas ta série !</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notifStreak" onchange="toggleNotif('streak')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1193,6 +1317,8 @@ function initApp() {
     generateDailyQuests();
     updateUI();
     showPetMessage('greeting');
+    loadNotifSettings();
+    scheduleNotifications();
 }
 
 function getTodayStr() {
@@ -1696,6 +1822,159 @@ window.addEventListener('DOMContentLoaded', () => {
         initApp();
     }
 });
+
+// ===== NOTIFICATIONS =====
+let notifSettings = {
+    enabled: false,
+    morning: false,
+    evening: false,
+    streak: true,
+    morningTime: '09:00',
+    eveningTime: '20:00'
+};
+
+function loadNotifSettings() {
+    const saved = localStorage.getItem('bpdandme_notif');
+    if (saved) notifSettings = { ...notifSettings, ...JSON.parse(saved) };
+    // Restore UI
+    document.getElementById('notifMorning').checked = notifSettings.morning;
+    document.getElementById('notifEvening').checked = notifSettings.evening;
+    document.getElementById('notifStreak').checked = notifSettings.streak;
+    document.getElementById('morningTime').value = notifSettings.morningTime;
+    document.getElementById('eveningTime').value = notifSettings.eveningTime;
+    updateNotifStatus();
+}
+
+function saveNotifSettings() {
+    notifSettings.morningTime = document.getElementById('morningTime').value;
+    notifSettings.eveningTime = document.getElementById('eveningTime').value;
+    localStorage.setItem('bpdandme_notif', JSON.stringify(notifSettings));
+    scheduleNotifications();
+}
+
+function updateNotifStatus() {
+    const el = document.getElementById('notifStatus');
+    if (!('Notification' in window)) {
+        el.innerHTML = '<div class="notif-status inactive">Notifications non supportées par ce navigateur</div>';
+        return;
+    }
+    if (Notification.permission === 'denied') {
+        el.innerHTML = '<div class="notif-status inactive">⚠️ Notifications bloquées — autorise-les dans les paramètres de ton navigateur</div>';
+        return;
+    }
+    if (notifSettings.morning || notifSettings.evening || notifSettings.streak) {
+        el.innerHTML = '<div class="notif-status active">✅ Notifications actives</div>';
+    } else {
+        el.innerHTML = '<div class="notif-status inactive">Aucune notification activée</div>';
+    }
+}
+
+async function requestNotifPermission() {
+    if (!('Notification' in window)) return false;
+    if (Notification.permission === 'granted') return true;
+    if (Notification.permission === 'denied') return false;
+    const result = await Notification.requestPermission();
+    return result === 'granted';
+}
+
+async function toggleNotif(type) {
+    const checkbox = document.getElementById('notif' + type.charAt(0).toUpperCase() + type.slice(1));
+    if (checkbox.checked) {
+        const granted = await requestNotifPermission();
+        if (!granted) {
+            checkbox.checked = false;
+            updateNotifStatus();
+            return;
+        }
+    }
+    notifSettings[type] = checkbox.checked;
+    notifSettings.enabled = notifSettings.morning || notifSettings.evening || notifSettings.streak;
+    saveNotifSettings();
+    updateNotifStatus();
+}
+
+let notifTimers = [];
+
+function scheduleNotifications() {
+    // Clear previous timers
+    notifTimers.forEach(t => clearTimeout(t));
+    notifTimers = [];
+
+    if (!notifSettings.enabled) return;
+
+    const now = new Date();
+
+    if (notifSettings.morning) {
+        const timer = scheduleAt(notifSettings.morningTime, () => {
+            sendNotification('🌅 Bonjour !', 'Tes quêtes du jour t\'attendent. Comment tu te sens aujourd\'hui ?');
+        });
+        if (timer) notifTimers.push(timer);
+    }
+
+    if (notifSettings.evening) {
+        const timer = scheduleAt(notifSettings.eveningTime, () => {
+            const msgs = [];
+            if (!state.todayMood) msgs.push('Tu n\'as pas encore enregistré ton humeur');
+            if (state.completedQuestIds.length < 5) msgs.push(`${5 - state.completedQuestIds.length} quêtes restantes`);
+            const body = msgs.length > 0 ? msgs.join(' • ') : 'Prends un moment pour ton journal 📔';
+            sendNotification('🌙 Bonsoir !', body);
+        });
+        if (timer) notifTimers.push(timer);
+    }
+
+    if (notifSettings.streak && state.streak > 0) {
+        // Streak reminder at 21:00 if no activity today
+        const timer = scheduleAt('21:00', () => {
+            if (state.todayDate !== getTodayStr()) {
+                sendNotification('🔥 Série en danger !', `Ta série de ${state.streak} jours va être perdue ! Ouvre l\'app vite !`);
+            }
+        });
+        if (timer) notifTimers.push(timer);
+    }
+}
+
+function scheduleAt(timeStr, callback) {
+    const [h, m] = timeStr.split(':').map(Number);
+    const now = new Date();
+    const target = new Date();
+    target.setHours(h, m, 0, 0);
+
+    // If time already passed today, schedule for tomorrow
+    if (target <= now) target.setDate(target.getDate() + 1);
+
+    const delay = target - now;
+    if (delay > 0 && delay < 86400000) {
+        return setTimeout(() => {
+            callback();
+            // Reschedule for next day
+            scheduleNotifications();
+        }, delay);
+    }
+    return null;
+}
+
+function sendNotification(title, body) {
+    if (Notification.permission !== 'granted') return;
+
+    // Try service worker notification first (works in background)
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification(title, {
+                body: body,
+                icon: './icon-192.png',
+                badge: './icon-192.png',
+                tag: 'bpdandme-reminder',
+                renotify: true,
+                vibrate: [200, 100, 200]
+            });
+        });
+    } else {
+        new Notification(title, {
+            body: body,
+            icon: './icon-192.png'
+        });
+    }
+}
 
 // ===== PWA =====
 if ('serviceWorker' in navigator) {
