@@ -1,6 +1,6 @@
 {
-  "name": "Sophie",
-  "short_name": "Sophie",
+  "name": "BPDandME",
+  "short_name": "BPDandME",
   "description": "Ton compagnon de bien-être mental",
   "start_url": "./index.html",
   "display": "standalone",

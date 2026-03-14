@@ -17,7 +17,7 @@ function createWindow() {
         minHeight: 600,
         maxWidth: 600,
         resizable: true,
-        title: 'Sophie',
+        title: 'BPDandME',
         backgroundColor: '#f0e6f6',
         autoHideMenuBar: true,
         webPreferences: {

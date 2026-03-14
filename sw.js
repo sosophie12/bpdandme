@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sophie-v1';
+const CACHE_NAME = 'bpdandme-v1';
 const ASSETS = [
   './',
   './index.html',

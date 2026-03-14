@@ -1,7 +1,7 @@
 {
-  "name": "sophie-app",
+  "name": "bpdandme-app",
   "version": "1.0.0",
-  "description": "Sophie — Ton compagnon de bien-être mental",
+  "description": "BPDandME — Ton compagnon de bien-être mental",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -16,7 +16,7 @@
   },
   "build": {
     "appId": "com.sophie.wellbeing",
-    "productName": "Sophie",
+    "productName": "BPDandME",
     "directories": {
       "output": "dist"
     },
@@ -33,13 +33,13 @@
       "icon": "icon.png"
     },
     "portable": {
-      "artifactName": "Sophie.exe"
+      "artifactName": "BPDandME.exe"
     },
     "nsis": {
       "oneClick": true,
       "installerIcon": "icon.png",
       "uninstallerIcon": "icon.png",
-      "artifactName": "Sophie-Setup.exe"
+      "artifactName": "BPDandME-Setup.exe"
     }
   }
 }
