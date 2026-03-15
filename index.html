@@ -314,35 +314,6 @@
         .mood-save-btn.visible { display: block; }
         .mood-save-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(155,114,207,0.4); }
 
-        /* ===== ONGLETS ===== */
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-        }
-        .tabs::-webkit-scrollbar { display: none; }
-        .tab-btn {
-            padding: 8px 18px;
-            border: none;
-            border-radius: 50px;
-            background: var(--card);
-            color: var(--text-light);
-            font-family: 'Nunito', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 700;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-            box-shadow: var(--shadow);
-        }
-        .tab-btn.active {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: white;
-        }
-
         /* ===== QUÊTES ===== */
         .quest-card {
             background: var(--card);
@@ -427,10 +398,6 @@
         }
 
         /* ===== SOS / EXERCICES ===== */
-        .sos-section {
-            display: none;
-        }
-        .sos-section.active { display: block; }
         .sos-card {
             background: var(--card);
             border-radius: var(--radius);
@@ -545,8 +512,6 @@
         .breathing-circle.exhale { transform: scale(0.8); }
 
         /* ===== JOURNAL ===== */
-        .journal-section { display: none; }
-        .journal-section.active { display: block; }
         .journal-card {
             background: var(--card);
             border-radius: var(--radius);
@@ -607,8 +572,6 @@
         }
 
         /* ===== STATS ===== */
-        .stats-section { display: none; }
-        .stats-section.active { display: block; }
         .stat-card {
             background: var(--card);
             border-radius: var(--radius);
@@ -812,8 +775,8 @@
         }
 
         /* ===== QUEST SECTIONS ===== */
-        .quest-section { display: none; }
-        .quest-section.active { display: block; }
+        .quest-section, .sos-section, .journal-section, .stats-section { display: none; }
+        .quest-section.active, .sos-section.active, .journal-section.active, .stats-section.active { display: block; }
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 380px) {
@@ -901,16 +864,8 @@
             <button class="mood-save-btn" id="moodSaveBtn" onclick="saveMood()">Enregistrer mon humeur 💜</button>
         </div>
 
-        <!-- ONGLETS -->
-        <div class="tabs" id="mainTabs">
-            <button class="tab-btn active" onclick="switchTab('quests')">🗡️ Quêtes</button>
-            <button class="tab-btn" onclick="switchTab('sos')">🆘 SOS</button>
-            <button class="tab-btn" onclick="switchTab('journal')">📔 Journal</button>
-            <button class="tab-btn" onclick="switchTab('stats')">📊 Stats</button>
-        </div>
-
         <!-- QUÊTES -->
-        <div class="quest-section active" id="questsSection">
+        <div class="quest-section" id="questsSection">
             <div class="section-title" style="margin-bottom: 0.5rem;">
                 🌅 Quêtes du jour
                 <span style="margin-left:auto; font-size:0.8rem; color:var(--text-light);" id="questProgress">0/5</span>
@@ -1062,7 +1017,7 @@
             <span class="nav-icon">🗡️</span>
             <span class="nav-label">Quêtes</span>
         </button>
-        <button class="nav-btn sos-nav" onclick="switchTab('sos')">
+        <button class="nav-btn sos-nav" onclick="navTo('sos')">
             <span class="nav-icon">SOS</span>
         </button>
         <button class="nav-btn" onclick="navTo('journal')">
@@ -1319,6 +1274,7 @@ function initApp() {
     showPetMessage('greeting');
     loadNotifSettings();
     scheduleNotifications();
+    navTo('home');
 }
 
 function getTodayStr() {
@@ -1718,52 +1674,50 @@ function renderBadges() {
 }
 
 // ===== NAVIGATION =====
-function switchTab(tab) {
-    // Réinitialiser les onglets
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.quest-section, .sos-section, .journal-section, .stats-section').forEach(s => s.classList.remove('active'));
+const ALL_SECTIONS = ['petSection', 'moodSection', 'questsSection', 'sosSection', 'journalSection', 'statsSection'];
 
-    const tabMap = {
-        quests: { section: 'questsSection', tabIdx: 0 },
-        sos: { section: 'sosSection', tabIdx: 1 },
-        journal: { section: 'journalSection', tabIdx: 2 },
-        stats: { section: 'statsSection', tabIdx: 3 },
-    };
-
-    const t = tabMap[tab];
-    if (t) {
-        document.getElementById(t.section).classList.add('active');
-        const tabs = document.querySelectorAll('.tab-btn');
-        if (tabs[t.tabIdx]) tabs[t.tabIdx].classList.add('active');
-    }
-
-    // Scroll up
-    document.querySelector('.main-container').scrollTop = 0;
-
-    if (tab === 'journal') renderJournal();
-    if (tab === 'stats') { updateStats(); renderBadges(); }
-
-    // Nav active state
-    document.querySelectorAll('.nav-btn:not(.sos-nav)').forEach(b => b.classList.remove('active'));
+function hideAllSections() {
+    ALL_SECTIONS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.display = 'none';
+            el.classList.remove('active');
+        }
+    });
 }
 
 function navTo(section) {
-    if (section === 'home') {
-        // Show pet + mood + quests
-        document.getElementById('petSection').style.display = 'block';
-        document.getElementById('moodSection').style.display = 'block';
-        switchTab('quests');
+    hideAllSections();
 
-        document.querySelectorAll('.nav-btn:not(.sos-nav)').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.nav-btn')[0].classList.add('active');
-        return;
-    }
+    // Map each nav to its sections
+    const pageMap = {
+        home:    ['petSection', 'moodSection'],
+        quests:  ['questsSection'],
+        sos:     ['sosSection'],
+        journal: ['journalSection'],
+        stats:   ['statsSection']
+    };
 
-    const navMap = { quests: 1, journal: 3, stats: 4 };
-    switchTab(section);
+    const sections = pageMap[section] || pageMap.home;
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.display = 'block';
+            el.classList.add('active');
+        }
+    });
 
-    document.querySelectorAll('.nav-btn:not(.sos-nav)').forEach(b => b.classList.remove('active'));
-    const idx = navMap[section];
+    // Scroll to top
+    document.querySelector('.main-container').scrollTop = 0;
+
+    // Trigger renders
+    if (section === 'journal') renderJournal();
+    if (section === 'stats') { updateStats(); renderBadges(); }
+
+    // Nav active state
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    const navIdx = { home: 0, quests: 1, sos: 2, journal: 3, stats: 4 };
+    const idx = navIdx[section];
     if (idx !== undefined) document.querySelectorAll('.nav-btn')[idx].classList.add('active');
 }
 
